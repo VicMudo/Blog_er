@@ -1,0 +1,50 @@
+{% extends 'blog/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-10 mx-auto">
+        <article>
+            <p class="author"><a href="{% url 'blog:user_posts' post.author.username%}">{{ post.author }}</a> on
+                {{ post.date_posted }}</p>
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.content }}</p>
+        </article>
+
+        <div>
+            {% if post.author == request.user %}
+            <a href="{% url 'blog:post_update' post.pk %}" class="btn btn-outline-secondary btn-sm">Update</a>
+            <a href="{% url 'blog:post_delete' post.pk %}" class="btn btn-danger btn-sm">Delete</a>
+            {% endif %}
+        </div>
+        <hr>
+        <div>
+            <h4>Comment Section</h4>
+            {% for comment in comments %}
+            <!-- <div class="bg-dark text-light"  class="jumbotron" style="width: 400px;"> -->
+                <div class="alert alert-primary">
+                <p><b>{{ comment.name }}</b> on {{ comment.created }}</p>
+                <p>{{ comment.body }}</p>
+            </div>
+           
+            {% empty %}
+            <p>No comments yet!</p>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-sm-2 mx auto">
+        <h5>Comment here</h5>
+        <form action="" method="POST">
+            {% csrf_token %}
+            {{form|crispy}}
+            <button class="btn btn-outline-success">Post Comment</button>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-2">
+        
+    </div>
+</div>
+{% endblock content %}
