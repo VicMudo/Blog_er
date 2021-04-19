@@ -20,10 +20,13 @@ from django.conf.urls.static import static
 
 from users import views as user_views
 from django.contrib.auth import views as auth_views
+from searches.views import search_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('blog.urls', namespace='blog')),
+
+    path('search/', search_view),
 
     path('register/', user_views.register, name='register'),
     path('login/', user_views.LogInUser.as_view(), name='login'),

@@ -4,11 +4,28 @@ from django.utils import timezone
 from django.urls import reverse
 
 
+class PostQuerySet(models.QuerySet):
+    def search(self, query):
+        return self.filter(content__icontains=query)
+
+class PostManager(models.Manager):
+    def get_queryset(self):
+        return PostQuerySet(self.model, using=self._db)
+
+    def search(self, query=None):
+        if query is None:
+            return self.get_queryset().none()
+        return self.get_queryset().search(query)
+
+
 class Post(models.Model):
     title = models.CharField(max_length=200)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     date_posted = models.DateTimeField(default=timezone.now)
+    view_count = models.PositiveIntegerField(default=0)
+
+    objects = PostManager()
 
     def __str__(self):
         return f'{self.title}: by {self.author}'
@@ -32,15 +49,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.name} on {self.created}'
-
-
-class SearchQuery(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    query = models.CharField(max_length=100)
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f'{self.query[:20]}...'
-
-    class Meta:
-        verbose_name_plural = 'Search query'

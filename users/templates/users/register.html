@@ -1,6 +1,8 @@
 {% extends 'users/base.html' %}
 {% load crispy_forms_tags %}
 
+{% block title %}signup{% endblock %}
+
 {% block content %}
   <form action="" method="POST">
       {% csrf_token %}

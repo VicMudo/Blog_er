@@ -1,28 +1,29 @@
 {% extends 'blog/base.html' %}
 {% block title %}Home{% endblock title %}
- 
+
 {% block content %}
+
 
 <div class="row">
     <div class="col-md-8">
-        <form action="{% url 'blog:search' %}">
+        <form action="/search/">
             {% csrf_token %}
-            <input type="search" placeholder="Enter your search here" name="query" class="form-control">
-            <button class="btn btn-outline-success mb-5">Search</button>
+            <input type="search" placeholder="Enter your search here" name="q" aria-label="search" class="form-control">
+            <button class="btn btn-outline-success mt-2 mb-5">Search</button>
         </form>
-
         {% for post in posts %}
         <article class="article">
-            <p class="author"><a href="{% url 'blog:user_posts' post.author.username %}">{{ post.author }}</a> on
-                {{ post.date_posted }}</p>
+            <span>
+                <p class="author"><a href="{% url 'blog:user_posts' post.author.username %}">{{ post.author }}</a> | on
+                    {{ post.date_posted }} | &#x1f441 {{ post.view_count }} Views</p>
+            </span>
             <h3><a href="{% url 'blog:post_detail' post.pk %}">{{ post.title }}</a></h3>
             <img src="{{post.author.profile.p_pic.url}}" class="rounded-circle z-depth-0" alt="avatar image"
                 height="35">
-            <p class="mr-10">{{ post.content|truncatewords:30 }}<a href="{% url 'blog:post_detail' post.pk %}"> Read
+            <p class="mr-10">{{ post.content|truncatewords:30 }}....<a href="{% url 'blog:post_detail' post.pk %}">Read
                     More</a></p>
         </article>
-        
-        <hr>
+
         <hr>
         {% endfor %}
 
@@ -36,30 +37,33 @@
         {% for num in page_obj.paginator.page_range %}
         {% if page_obj.number == num %}
         <a class="btn btn-info" href="?page={{ num }}">{{ num }}</a>
-        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-        <a class="btn btn-outline-info" href="?page={{ num }}">{{ num }}</a>
-        {% endif %}
-        {% endfor %}
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a class="btn btn-outline-info"
+            href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
 
-        {% if page_obj.has_next %}
-        <a class="btn btn-outline-info" href="?page={{ page_obj.next_page_number }}">Next</a>
-        <a class="btn btn-outline-info" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
-        {% endif %}
+            {% if page_obj.has_next %}
+            <a class="btn btn-outline-info" href="?page={{ page_obj.next_page_number }}">Next</a>
+            <a class="btn btn-outline-info" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+            {% endif %}
 
-        {% endif %}
+            {% endif %}
     </div>
 
 
     <div class="col-md-4">
-        <div class="content-section mt-5">
-            <h3>Highlights</h3>
-            <hr>
-            <p>Latest posts</p>
-            <hr>
-            <p>Calenders</p>
-            <hr>
-            <p>Lifestyle</p>
-            <hr>
+        <div class="content-section mt-2">
+            <h4>Please email us with your feedbacks</h4>
+                <form action="{% url 'blog:handle_email' %}" method="POST">
+                    {% csrf_token %}
+                    {% if not request.user.is_authenticated %}
+                    Your Email: <input class="form-control" type="email" name="email">
+                    Message: <textarea id="" class="form-control" name="message"></textarea>
+                    {% else %}
+                    Message: <textarea id="" class="form-control" name="message"></textarea>
+                    {% endif %}
+                    <button type="submit" class="btn btn-outline-primary btn-lg mt-2">Send</button>
+                </form>
         </div>
     </div>
 </div>

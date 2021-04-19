@@ -1,0 +1,14 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h3 >Welcome to Blog_er</h3>
+    <p class="everything">Everything Tech related is here!!</p>
+    <a class="btn btn-outline-primary btn-lg" href="{% url 'blog:blog_home' %}">Continue</a>
+    <p class="note">Please note that if you are not signed in you wont be able to create your own posts.</p>
+</div>
+
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "blog/base.html" %}
+
+{% block title %}search results{% endblock title %}
+
+{% block content %}
+ 
+<div class="row">
+    <div class="col-12 col-8 mx-auto">
+        <div class="lead">
+            {% if query %}
+            <h2>Your search results for "{{ query }}"</h2>
+            {% else %}
+            <h2>Your search was blank</h2>
+            {% endif %}
+
+            {% for obj in search_list %}
+               <p><a href="{% url 'blog:post_detail' obj.pk %}">{{ obj.title }}</a></p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,12 +1,17 @@
 {% extends 'blog/base.html' %}
 {% load crispy_forms_tags %}
 
+{% block title %} {{ post.title }} {% endblock title %}
+
 {% block content %}
 <div class="row">
     <div class="col-sm-10 mx-auto">
+
         <article>
-            <p class="author"><a href="{% url 'blog:user_posts' post.author.username%}">{{ post.author }}</a> on
-                {{ post.date_posted }}</p>
+            <span>
+                <p class="author"><a href="{% url 'blog:user_posts' post.author.username%}">{{ post.author }}</a> | on
+                    {{ post.date_posted }} | &#x1f441 {{ post.view_count }} Views</p>
+            </span>
             <h2>{{ post.title }}</h2>
             <p>{{ post.content }}</p>
         </article>
@@ -18,23 +23,28 @@
             {% endif %}
         </div>
         <hr>
-        <div>
-            <h4>Comment Section</h4>
+        <div class="comment-list">
+
+            <h4>Comments</h4>
             {% for comment in comments %}
-            <!-- <div class="bg-dark text-light"  class="jumbotron" style="width: 400px;"> -->
-                <div class="alert alert-primary">
-                <p><b>{{ comment.name }}</b> on {{ comment.created }}</p>
-                <p>{{ comment.body }}</p>
-            </div>
            
+            <div class="comment">
+                <div class="alert alert-primary">
+                    <p><b>{{ comment.name }}</b> on {{ comment.created }}</p>
+                    <p>{{ comment.body }}</p>
+                </div>
+            </div>
+
             {% empty %}
-            <p>No comments yet!</p>
+            <div class="no-comment">
+                <p>No comments yet!</p>
+            </div>
             {% endfor %}
         </div>
     </div>
     <div class="col-sm-2 mx auto">
         <h5>Comment here</h5>
-        <form action="" method="POST">
+        <form action="" method="POST" id="comment-form">
             {% csrf_token %}
             {{form|crispy}}
             <button class="btn btn-outline-success">Post Comment</button>
@@ -44,7 +54,70 @@
 
 <div class="row">
     <div class="col-sm-2">
-        
+
     </div>
 </div>
 {% endblock content %}
+
+{% block scripts %}
+<!-- <script>
+    let commentForm = document.getElementById("comment-form")
+
+    commentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        let name = document.querySelector("#id_name").value;
+        let email = document.querySelector("#id_email").value;
+        let content = document.querySelector("#id_body").value;
+
+        if (name && email && content) {
+            console.log("Form submitted successfully!")
+            let formData = new FormData(commentForm);
+
+            let csrfValue = document.getElementsByName("csrfmiddlewaretoken")[0].value
+
+            fetch("{% url 'blog:post_detail' post.pk %}", {
+                method: "POST",
+                headers: {
+                    'X-CSRFToken': csrfValue,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            }).then((response) => {
+                return response.json()
+            }).then((data) => {
+                commentForm.reset()
+
+                console.log(data);
+                    
+                });
+
+                let instance = JSON.parse(data["new_comment"]);
+                let fields = instance[0]["fields"];
+                let commentList = document.querySelector(".comment-list");
+                let noComment = document.querySelector(".no-comment");
+
+                if (noComment) {
+                    commentList.removeChild(noComment);
+                }
+
+                commentList.innerHTML = + `
+
+                    <div class="comment">
+                        <div class="alert alert-primary">
+                            <p><b>${fields['name']}</b> Just now</p>
+                            <p>${fields['body']}</p>
+                        </div>
+                    </div>
+
+                         `
+
+            }).catch((error) => {
+                console.error("Error", error)
+            })
+
+        } else {
+            console.log("Please enter all the form fields");
+        }
+    })
+</script> -->
+{% endblock scripts %}

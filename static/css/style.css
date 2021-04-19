@@ -3,14 +3,62 @@ nav{
     background-color:black;
 }
 
+.whole-back{
+    background-image: url(../img/background.png);
+    color: #fff;
+    padding-top: 10px;
+    padding-bottom: 40px;
+}
+
+.header h3{
+    font-size: 45px;
+    padding-top: 120px;
+}
+
+.header .everything{
+    font-style: oblique;
+}
+
+.header a{
+    border-radius: 40%;
+    margin-top: 20px;
+}
+
+.header .note{
+    margin-top: 50px;
+    padding-bottom: 120px;
+    font-style: italic;
+}
+
+
+hr{
+    border-color: rgb(107, 107, 107);
+}
+
+.article h3 a{
+    text-decoration: none;
+}
+
+article .author a{
+    text-decoration: none;
+}
+
+.lead p a{
+    text-decoration: none;
+}
+
+.auth-link{
+    text-decoration: none;
+}
+
 .footer{
     background-color: rgba(0, 0, 0, 0.945);
-    margin-top: 30px;
     padding-top: 20px;
+    padding-bottom: 20px;
     background-attachment: scroll;
 }
 
-.footer-content{
+.footer-header{
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
@@ -19,3 +67,12 @@ nav{
     color: rgb(255, 255, 255);
 }
 
+.footer-content{
+    width: 65%;
+    margin: 0 auto;
+    color: rgb(247, 238, 238);
+}
+
+.footer-content a{
+   color: rgb(153, 153, 153);
+}

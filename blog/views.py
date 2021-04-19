@@ -1,22 +1,31 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect, reverse
+from django.views import View
 from django.views.generic import (ListView, DetailView, CreateView,
-    UpdateView, DeleteView
+    UpdateView, DeleteView, FormView
 )
+from django.views.generic.detail import SingleObjectMixin
+from django.views.generic import FormView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 from django.contrib import messages
-from .models import Post, SearchQuery
-from .forms import CommentForm
+from django.core import serializers
+from django.http import JsonResponse
+from django.core.mail import send_mail
+from .models import Comment, Post
+from .forms import CommentForm, EmailFeedbackForm
 
+
+def welcome(request):
+    return render(request, 'blog/welcome.html')
 
 class PostListView(ListView):
     model = Post
     template_name = 'blog/home.html'
     context_object_name = 'posts'
     ordering = ['-date_posted']
-    paginate_by = 5
-
+    paginate_by = 4
+    
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
@@ -66,26 +75,69 @@ class UserPostListView(ListView):
         return Post.objects.filter(author=user).order_by('-date_posted')
 
 
-def post_detail_view(request, pk):
-    post = get_object_or_404(Post, pk=pk)
+class PostDisplayView(DetailView):
+    model = Post
+    
+    def get_object(self):
+        object = super(PostDisplayView, self).get_object()
+        object.view_count += 1
+        object.save()
+        return object
 
-    new_comment = None
-    form = CommentForm(request.POST or None)
-    if form.is_valid():
-        new_comment = form.save(commit=False)
-        new_comment.post = post
-        new_comment.save()
-    form = CommentForm()
+    def get_context_data(self, **kwargs):
+        context = super(PostDisplayView, self).get_context_data(**kwargs)
+        context['comments'] = Comment.objects.filter(post=self.get_object())
+        context['form'] = CommentForm()
+        return context
 
-    comments = post.comments.all()
-    context = {'form': form, 'post': post, 'comments': comments}
-    return render(request, 'blog/post_detail.html', context)
 
-def search(request):
-    query = request.GET.get('query', None)
-    user = None
+class CommentView(FormView):
+    form_class = CommentForm
+    template_name = 'blog/post_detail.html'
 
+    def form_valid(self, form):
+        if self.request.is_ajax:    
+            post = Post.objects.get(pk=self.kwargs['pk'])
+            form.instance.post = post
+            obj = form.save()
+            res = [{"name": obj.name, "created": obj.created, "body": obj.body}]
+            return JsonResponse(res, safe=False)
+        return super(CommentView, self).form_valid(form)
+        
+    def get_success_url(self):
+       return reverse('blog:post_detail', kwargs={'pk': self.kwargs['pk']})
+
+
+class PostDetailView(View):
+    def get(self, request, *args, **kwargs):
+        view = PostDisplayView.as_view()
+        return view(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        view = CommentView.as_view()
+        return view(request, *args, **kwargs)
+
+def handle_feedback_email(request):
     if request.user.is_authenticated:
-        user = request.user
-    SearchQuery.objects.create(user=user, query=query)
-    return render(request, 'blog/search.html', {'query': query})
+        if request.method == 'POST':
+            sender_email = request.user.email
+            message = request.POST['message']
+            send_mail("Viewer Feedback",
+                    message,
+                    sender_email,
+                    ['victory@hotmail.io'],
+                    fail_silently=False
+            )
+            return redirect('blog:blog_home')
+    else:
+        if request.method == 'POST':
+            sender_email = request.POST['email']
+            message = request.POST['message']
+            send_mail("Viewer Feedback",
+                        message,
+                        sender_email,
+                        ['victory@hotmail.io'],
+                        fail_silently=False
+                    )
+            return redirect('blog:blog_home')
+            
